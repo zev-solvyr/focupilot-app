@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #000000;
+    color: #ffffff;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom scrollbar for modern sleek UI */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Monochrome glow effects */
+.glow-white {
+  box-shadow: 0 0 25px -5px rgba(255, 255, 255, 0.2);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 15px -3px rgba(255, 255, 255, 0.08);
+}
+
+/* Minimalist Monochrome Glass Cards */
+.glass-panel {
+  background: #0a0a0a;
+  border: 1px solid #1f1f1f;
+}
+
+.glass-panel-interactive {
+  background: #0a0a0a;
+  border: 1px solid #1f1f1f;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-interactive:hover {
+  border-color: #383838;
+  background: #121212;
+  transform: translateY(-1px);
+}
+
+.font-mono-numbers {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+}
