@@ -49,17 +49,17 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({ sessions = [], tas
   const weekDayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
   return (
-    <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-zinc-900">
+    <div className="ios-matte-panel rounded-3xl p-4 sm:p-5">
       {/* Month & Nav Controls */}
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-white tracking-wide">
+          <h2 className="text-sm font-bold text-white tracking-tight">
             {monthNames[month]} <span className="font-mono text-zinc-500 font-normal">{year}</span>
           </h2>
           {!isCurrentMonth && (
             <button
               onClick={handleGoToday}
-              className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 transition-colors"
+              className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors"
             >
               Today
             </button>
@@ -69,14 +69,14 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({ sessions = [], tas
         <div className="flex items-center gap-1">
           <button
             onClick={handlePrevMonth}
-            className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors"
+            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-95"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors"
+            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-95"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -87,7 +87,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({ sessions = [], tas
       {/* Weekday Headers */}
       <div className="grid grid-cols-7 gap-1 text-center mb-1.5">
         {weekDayLabels.map((day) => (
-          <span key={day} className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">
+          <span key={day} className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
             {day}
           </span>
         ))}
@@ -118,8 +118,8 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({ sessions = [], tas
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all ${
                   isToday
-                    ? 'bg-white text-black font-extrabold shadow-[0_0_12px_rgba(255,255,255,0.4)]'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900 font-mono-numbers'
+                    ? 'bg-white text-black font-extrabold shadow-[0_0_14px_rgba(255,255,255,0.45)]'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/10 font-mono-numbers'
                 }`}
               >
                 {dayNumber}

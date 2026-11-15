@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { TabType, BottomNav } from './components/BottomNav';
 import { Navbar } from './components/Navbar';
 import { TodayView } from './views/TodayView';
@@ -14,6 +14,7 @@ import { Goal, Task, FocusSession, JournalEntry, MentorMessage, UserSettings } f
 
 export function App() {
   const [activeTab, setActiveTab] = useState<TabType>('today');
+  const [tabHistory, setTabHistory] = useState<TabType[]>(['today']);
 
   // Core Data
   const [settings, setSettings] = useState<UserSettings>(() => storage.getSettings());
@@ -23,9 +24,126 @@ export function App() {
   const [journal, setJournal] = useState<JournalEntry[]>(() => storage.getJournalEntries());
   const [mentorChat, setMentorChat] = useState<MentorMessage[]>(() => storage.getMentorChat());
 
-  // Modals
+  // Screen & Modal states for back navigation
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [isAddingTask, setIsAddingTask] = useState(false);
+
+  // Switch tabs and track navigation history
+  const handleTabChange = (newTab: TabType) => {
+    if (newTab === activeTab) return;
+    setTabHistory((prev) => [...prev, newTab]);
+    setActiveTab(newTab);
+    window.history.pushState({ screen: newTab }, '');
+  };
+
+  // Open modals with history push
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+    window.history.pushState({ screen: 'settings' }, '');
+  };
+
+  const handleOpenAddGoal = () => {
+    setIsAddGoalOpen(true);
+    window.history.pushState({ screen: 'add-goal' }, '');
+  };
+
+  const handleSelectGoal = (goal: Goal | null) => {
+    setSelectedGoal(goal);
+    if (goal) {
+      window.history.pushState({ screen: 'goal-details' }, '');
+    }
+  };
+
+  const handleSetIsAddingTask = (adding: boolean) => {
+    setIsAddingTask(adding);
+    if (adding) {
+      window.history.pushState({ screen: 'add-task' }, '');
+    }
+  };
+
+  // Unified Go Back Handler
+  const goBack = useCallback(() => {
+    if (isSettingsOpen) {
+      setIsSettingsOpen(false);
+      return true;
+    }
+    if (isAddGoalOpen) {
+      setIsAddGoalOpen(false);
+      return true;
+    }
+    if (selectedGoal) {
+      setSelectedGoal(null);
+      return true;
+    }
+    if (isAddingTask) {
+      setIsAddingTask(false);
+      return true;
+    }
+    if (tabHistory.length > 1) {
+      const nextHistory = [...tabHistory];
+      nextHistory.pop(); // remove current tab
+      const prevTab = nextHistory[nextHistory.length - 1];
+      setTabHistory(nextHistory);
+      setActiveTab(prevTab);
+      return true;
+    }
+    if (activeTab !== 'today') {
+      setActiveTab('today');
+      setTabHistory(['today']);
+      return true;
+    }
+    return false;
+  }, [isSettingsOpen, isAddGoalOpen, selectedGoal, isAddingTask, tabHistory, activeTab]);
+
+  // Handle browser / hardware back button (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      goBack();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [goBack]);
+
+  // Touch Edge Swipe-Back Gesture for Mobile
+  const touchStartRef = useRef<{ x: number; y: number; isEdge: boolean }>({ x: 0, y: 0, isEdge: false });
+
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      // Starts within the left 50px of the screen (iOS standard edge swipe threshold)
+      const isEdge = touch.clientX <= 50;
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        isEdge,
+      };
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!touchStartRef.current.isEdge || e.changedTouches.length !== 1) return;
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      const deltaY = touch.clientY - touchStartRef.current.y;
+
+      // Swiped right by at least 60px with minimal vertical deflection (< 75px)
+      if (deltaX > 60 && Math.abs(deltaY) < 75) {
+        goBack();
+      }
+      touchStartRef.current = { x: 0, y: 0, isEdge: false };
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [goBack]);
 
   // Tasks handlers
   const handleAddTask = (newTask: Task) => {
@@ -94,7 +212,7 @@ export function App() {
       {/* Top Navigation */}
       <Navbar
         settings={settings}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={handleOpenSettings}
       />
 
       {/* Main Content Area */}
@@ -107,13 +225,17 @@ export function App() {
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
             onReorderTasks={handleReorderTasks}
+            isAdding={isAddingTask}
+            setIsAdding={handleSetIsAddingTask}
           />
         )}
 
         {activeTab === 'goals' && (
           <GoalsView
             goals={goals}
-            onOpenAddGoal={() => setIsAddGoalOpen(true)}
+            selectedGoal={selectedGoal}
+            onSelectGoal={handleSelectGoal}
+            onOpenAddGoal={handleOpenAddGoal}
             onUpdateGoal={handleUpdateGoal}
             onDeleteGoal={handleDeleteGoal}
           />
@@ -145,7 +267,7 @@ export function App() {
       </main>
 
       {/* Bottom Floating Navigation Dock */}
-      <BottomNav activeTab={activeTab} onChangeTab={setActiveTab} />
+      <BottomNav activeTab={activeTab} onChangeTab={handleTabChange} />
 
       {/* Modals */}
       <SettingsModal

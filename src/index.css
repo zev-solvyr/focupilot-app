@@ -2,8 +2,8 @@
 
 @layer base {
   :root {
-    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
   }
 
   body {
@@ -11,6 +11,9 @@
     background-color: #000000;
     color: #ffffff;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
   }
 }
 
@@ -33,34 +36,65 @@
   background: #404040;
 }
 
-/* Monochrome glow effects */
-.glow-white {
-  box-shadow: 0 0 25px -5px rgba(255, 255, 255, 0.2);
+/* iOS Matte Finish Design System */
+.ios-matte-panel {
+  background-color: rgba(20, 20, 22, 0.72);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 10px 30px -5px rgba(0, 0, 0, 0.7);
 }
 
-.glow-subtle {
-  box-shadow: 0 0 15px -3px rgba(255, 255, 255, 0.08);
+.ios-matte-card {
+  background-color: rgba(26, 26, 28, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 8px 24px -6px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Minimalist Monochrome Glass Cards */
+.ios-matte-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(34, 34, 38, 0.75);
+}
+
+.ios-matte-sheet {
+  background-color: rgba(18, 18, 20, 0.88);
+  backdrop-filter: blur(35px) saturate(200%);
+  -webkit-backdrop-filter: blur(35px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.18), 0 25px 60px -10px rgba(0, 0, 0, 0.85);
+}
+
 .glass-panel {
-  background: #0a0a0a;
-  border: 1px solid #1f1f1f;
-}
-
-.glass-panel-interactive {
-  background: #0a0a0a;
-  border: 1px solid #1f1f1f;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-panel-interactive:hover {
-  border-color: #383838;
-  background: #121212;
-  transform: translateY(-1px);
+  background-color: rgba(20, 20, 22, 0.72);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }
 
 .font-mono-numbers {
   font-family: var(--font-mono);
   font-feature-settings: "tnum";
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

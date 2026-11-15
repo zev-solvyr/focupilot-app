@@ -12,6 +12,8 @@ interface TodayViewProps {
   onToggleTask: (taskId: string) => void;
   onDeleteTask: (taskId: string) => void;
   onReorderTasks: (tasks: Task[]) => void;
+  isAdding?: boolean;
+  setIsAdding?: (adding: boolean) => void;
 }
 
 export const TodayView: React.FC<TodayViewProps> = ({
@@ -21,15 +23,20 @@ export const TodayView: React.FC<TodayViewProps> = ({
   onToggleTask,
   onDeleteTask,
   onReorderTasks,
+  isAdding: externalIsAdding,
+  setIsAdding: externalSetIsAdding,
 }) => {
-  const [isAdding, setIsAdding] = useState(false);
+  const [internalIsAdding, setInternalIsAdding] = useState(false);
+  const isAdding = externalIsAdding !== undefined ? externalIsAdding : internalIsAdding;
+  const setIsAdding = externalSetIsAdding || setInternalIsAdding;
+
   const [taskText, setTaskText] = useState('');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isAdding) {
-      inputRef.current?.focus();
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isAdding]);
 
@@ -102,80 +109,31 @@ export const TodayView: React.FC<TodayViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 pb-28 max-w-xl mx-auto px-2 sm:px-0">
-      {/* 1. Monthly Calendar at the Top with Today's Date Highlighted */}
+    <div className="space-y-4 pb-32 max-w-xl mx-auto px-2 sm:px-0 relative min-h-[calc(100vh-140px)]">
+      {/* 1. Monthly Calendar at Top with Today's Date Highlighted */}
       <MonthCalendar sessions={sessions} tasks={tasks} />
 
-      {/* 2. Tasks Section Header with Only the Prominent + Button */}
-      <div className="space-y-2.5 pt-1">
+      {/* 2. Tasks Section Header */}
+      <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between px-1">
           <div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h2 className="text-xs font-bold text-white uppercase tracking-wider">
               Today's Tasks
             </h2>
             <span className="text-[11px] text-zinc-500 font-mono">
               {tasks.filter((t) => t.completed).length} of {tasks.length} done
             </span>
           </div>
-
-          {/* Just the prominent, high-contrast + icon button */}
-          <button
-            onClick={() => setIsAdding(true)}
-            className="w-8 h-8 rounded-full bg-white hover:bg-zinc-200 text-black font-extrabold flex items-center justify-center transition-all shadow-md active:scale-95"
-            title="Add task"
-          >
-            <Plus className="w-5 h-5 stroke-[3]" />
-          </button>
         </div>
 
-        {/* Inline Direct Input when + is clicked */}
-        {isAdding && (
-          <form
-            onSubmit={handleSubmit}
-            className="p-3 rounded-2xl glass-panel border-2 border-white flex items-center gap-2 animate-fadeIn"
-          >
-            <input
-              ref={inputRef}
-              type="text"
-              value={taskText}
-              onChange={(e) => setTaskText(e.target.value)}
-              placeholder="Task name..."
-              className="flex-1 bg-transparent text-xs text-white placeholder-zinc-600 focus:outline-none"
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setIsAdding(false);
-                  setTaskText('');
-                }
-              }}
-            />
-            <button
-              type="submit"
-              disabled={!taskText.trim()}
-              className="px-3.5 py-1.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 disabled:opacity-20 transition-all shadow-sm"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsAdding(false);
-                setTaskText('');
-              }}
-              className="p-1.5 text-zinc-500 hover:text-white transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </form>
-        )}
-
-        {/* Tasks List with Up/Down and Drag Reordering */}
-        {tasks.length === 0 && !isAdding ? (
+        {/* 3. Tasks List with Up/Down and Drag Reordering */}
+        {tasks.length === 0 ? (
           <div
             onClick={() => setIsAdding(true)}
-            className="text-center py-12 glass-panel rounded-3xl border border-dashed border-zinc-900 cursor-pointer hover:border-zinc-700 transition-colors"
+            className="text-center py-14 ios-matte-panel rounded-3xl border border-dashed border-white/10 cursor-pointer hover:border-white/20 transition-all"
           >
-            <p className="text-xs text-zinc-400 font-medium">No tasks yet.</p>
-            <p className="text-[11px] text-zinc-600 mt-1">Tap + above to add a task.</p>
+            <p className="text-xs text-zinc-400 font-medium">No tasks for today.</p>
+            <p className="text-[11px] text-zinc-600 mt-1">Tap the + button below to add your first task.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -186,29 +144,29 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragEnd={handleDragEnd}
-                className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                className={`flex items-center justify-between p-3.5 rounded-2xl transition-all ${
                   draggedIndex === index ? 'opacity-30 border-white' : ''
                 } ${
                   task.completed
-                    ? 'bg-black border-zinc-900/60 opacity-40'
-                    : 'glass-panel border-zinc-900 hover:border-zinc-800'
+                    ? 'bg-black/60 border border-white/5 opacity-40'
+                    : 'ios-matte-card'
                 }`}
               >
                 {/* Drag Handle & Checkbox & Title */}
-                <div className="flex items-center gap-2.5 flex-1 min-w-0 mr-2">
-                  <div className="cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-400 p-0.5">
+                <div className="flex items-center gap-3 flex-1 min-w-0 mr-2">
+                  <div className="cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-300 p-0.5">
                     <GripVertical className="w-3.5 h-3.5" />
                   </div>
 
                   <button
                     onClick={() => handleTaskToggle(task.id, task.completed)}
-                    className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all shrink-0 ${
+                    className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-all shrink-0 ${
                       task.completed
                         ? 'bg-white border-white text-black'
-                        : 'border-zinc-700 bg-zinc-950 hover:border-white'
+                        : 'border-white/20 bg-black/40 hover:border-white'
                     }`}
                   >
-                    {task.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                    {task.completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </button>
 
                   <div className="min-w-0 flex items-center gap-2">
@@ -233,7 +191,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   <button
                     onClick={() => moveTaskUp(index)}
                     disabled={index === 0}
-                    className="p-1 text-zinc-600 hover:text-white disabled:opacity-20 transition-colors"
+                    className="p-1.5 text-zinc-500 hover:text-white disabled:opacity-20 transition-colors rounded-lg hover:bg-white/5"
                     title="Move up"
                   >
                     <ChevronUp className="w-3.5 h-3.5" />
@@ -242,7 +200,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   <button
                     onClick={() => moveTaskDown(index)}
                     disabled={index === tasks.length - 1}
-                    className="p-1 text-zinc-600 hover:text-white disabled:opacity-20 transition-colors"
+                    className="p-1.5 text-zinc-500 hover:text-white disabled:opacity-20 transition-colors rounded-lg hover:bg-white/5"
                     title="Move down"
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
@@ -250,7 +208,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
 
                   <button
                     onClick={() => onDeleteTask(task.id)}
-                    className="p-1 text-zinc-700 hover:text-white transition-colors ml-1"
+                    className="p-1.5 text-zinc-600 hover:text-white transition-colors ml-1 rounded-lg hover:bg-white/5"
                     title="Delete task"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -261,6 +219,58 @@ export const TodayView: React.FC<TodayViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* 4. Down Right Side Easily Accessible Big Size + Button */}
+      <button
+        onClick={() => setIsAdding(true)}
+        className="fixed bottom-22 right-5 sm:right-8 z-40 w-14 h-14 rounded-full bg-white text-black font-extrabold flex items-center justify-center shadow-[0_10px_30px_rgba(255,255,255,0.25)] hover:bg-zinc-200 active:scale-90 transition-all border border-white/20"
+        title="Add task"
+        aria-label="Add task"
+      >
+        <Plus className="w-7 h-7 stroke-[2.8]" />
+      </button>
+
+      {/* 5. iOS Matte Task Input Sheet */}
+      {isAdding && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-lg mb-20 sm:mb-0 p-4 rounded-3xl ios-matte-sheet flex items-center gap-2.5 animate-slideUp"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={taskText}
+              onChange={(e) => setTaskText(e.target.value)}
+              placeholder="Type task name..."
+              className="flex-1 bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none px-2 py-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setIsAdding(false);
+                  setTaskText('');
+                }
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!taskText.trim()}
+              className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 disabled:opacity-20 transition-all shadow-sm active:scale-95 shrink-0"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsAdding(false);
+                setTaskText('');
+              }}
+              className="p-2 text-zinc-400 hover:text-white transition-colors rounded-full hover:bg-white/10 shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

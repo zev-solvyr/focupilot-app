@@ -16,7 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({ settings, onOpenSettings }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-black/90 backdrop-blur-xl border-b border-[#1f1f1f] px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-30 w-full bg-black/75 backdrop-blur-2xl border-b border-white/10 px-4 py-3 sm:px-6 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
       <div className="max-w-xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-white text-black font-extrabold shadow-sm">
@@ -31,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({ settings, onOpenSettings }) => {
 
         <button
           onClick={onOpenSettings}
-          className="p-2 rounded-xl bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
           title="Settings & AI"
         >
           <Settings className="w-4 h-4" />
